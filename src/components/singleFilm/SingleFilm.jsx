@@ -7,41 +7,16 @@ import {
 } from 'react-router-dom';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useGetSingleFilm } from 'components/hooks/useGetSingleFilm';
 
 export default function SingleFilm() {
-  const { id } = useParams();
-  const URLDetails = `https://api.themoviedb.org/3/movie/${id}`;
-
-  const [arrayFilmDetails, setArrayFilmDetails] = useState({});
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    async function getByFilmDetails() {
-      setIsLoading(true);
-      try {
-        const moviesByFilmDetails = await axios.get(URLDetails, {
-          params: {
-            api_key: '4255b1252c36a3414584989077cdd509',
-          },
-        });
-        setArrayFilmDetails(moviesByFilmDetails.data);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    getByFilmDetails();
-  }, [URLDetails]);
-
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleClick = () => {
     navigate(location.state.from);
   };
+  const { arrayFilmDetails, error, isLoading } = useGetSingleFilm();
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -51,7 +26,11 @@ export default function SingleFilm() {
       {error !== '' && <p>Something went wrong: {error.message}</p>}
       <button onClick={handleClick}>Go back</button>
       <div>
-        <img src="" alt="" />
+        <img
+          src={`https://image.tmdb.org/t/p/original/${arrayFilmDetails.poster_path}`}
+          alt={`${arrayFilmDetails.title} poster`}
+          width={200}
+        />
         <h2>
           {arrayFilmDetails.title}({arrayFilmDetails.release_date?.slice(0, 4)})
         </h2>
@@ -62,7 +41,6 @@ export default function SingleFilm() {
           <p key={genr.id}>{genr.name}</p>
         ))}
       </div>
-      <div>film-{id}</div>
       <Link to="cast">Cast</Link>
       <Link to="reviews">Reviews</Link>
       <Outlet />
